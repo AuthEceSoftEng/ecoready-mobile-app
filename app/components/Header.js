@@ -12,8 +12,8 @@ const Header = () => {
         {/* Left Spacer */}
         <View style={{ flex: 1 }} />
 
-        {/* Clickable Logo */}
-        <TouchableOpacity onPress={() => navigate('Home')}>
+        {/* Centered Logo */}
+        <TouchableOpacity style={{ flex: 1, alignItems: 'center' }} onPress={() => navigate('Home')}>
           <Image
             source={require('../assets/images/logo.png')} // Logo path
             style={styles.logo}
@@ -21,11 +21,8 @@ const Header = () => {
           />
         </TouchableOpacity>
 
-        {/* Notification Icon */}
-        <View style={[styles.notificationIcon, { flex: 1 }]}>
-          <MaterialIcons name="notifications" size={28} color="#fff" />
-          <View style={styles.badge} />
-        </View>
+        {/* Right Spacer */}
+        <View style={{ flex: 1 }} />
       </View>
     </SafeAreaView>
   );

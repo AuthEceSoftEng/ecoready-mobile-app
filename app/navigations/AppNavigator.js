@@ -57,9 +57,18 @@ const AppNavigator = () => {
           })}
         />
         <Tab.Screen
-          name="Games"
-          component={GamesScreen}
-        />
+  name="Games"
+  component={GamesScreen}
+  listeners={({ navigation }) => ({
+    tabPress: (e) => {
+      // Prevent default tab behavior
+      e.preventDefault();
+
+      // Navigate to Games and reset its state
+      navigation.navigate('Games', { reset: true });
+    },
+  })}
+  />
       </Tab.Navigator>
     </NavigationContainer>
   );
