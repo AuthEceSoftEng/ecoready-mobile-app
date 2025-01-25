@@ -110,7 +110,7 @@ export default function Quiz({ onExit }) {
       } else {
         setShowScore(true);
       }
-    }, 2000); // 2-second delay
+    }, 1000); // 1-second delay
   };
 
   const resetQuiz = () => {
@@ -157,7 +157,7 @@ export default function Quiz({ onExit }) {
             }}
             style={styles.exitButton}
             >
-            <Text style={styles.buttonText}>Back to Main Menu</Text>
+            <Text style={styles.buttonText}>🎮 Back to Game Hub</Text>
           </TouchableOpacity>
         </View>
       ) : (

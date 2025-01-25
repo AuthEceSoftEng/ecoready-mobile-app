@@ -297,7 +297,7 @@ const SectionDetails = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#f0f4c3',
     padding: 15,
   },
   card: {

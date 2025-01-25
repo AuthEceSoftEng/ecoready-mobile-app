@@ -134,15 +134,6 @@ export default function Game({ onExit }) {
         <Text style={styles.metricText}>🌿 Environment: {metrics.environment}</Text>
         <Text style={styles.metricText}>💰 Budget: {metrics.budget}</Text>
       </View>
-      <TouchableOpacity
-        onPress={() => {
-          resetGame();
-          onExit();
-        }}
-        style={styles.exitButton}
-      >
-        <Text style={styles.exitText}>🏠 Back to Main Menu</Text>
-      </TouchableOpacity>
     </View>
   );
 }

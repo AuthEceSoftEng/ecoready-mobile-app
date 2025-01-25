@@ -1,0 +1,47 @@
+name: Conditional EAS Build and Update
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  eas-workflow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine Changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -qE '(app.json|eas.json|native/|android/|ios/)'; then
+            echo "build_needed=true" >> $GITHUB_ENV
+            echo "update_needed=false" >> $GITHUB_ENV
+          else
+            echo "build_needed=false" >> $GITHUB_ENV
+            echo "update_needed=true" >> $GITHUB_ENV
+          fi
+
+      - name: Publish OTA Update (if needed)
+        if: env.update_needed == 'true'
+        run: |
+          eas update --channel preview --auto
+
+      - name: Build App (if needed)
+        if: env.build_needed == 'true'
+        run: |
+          eas build --platform all --non-interactive --no-wait

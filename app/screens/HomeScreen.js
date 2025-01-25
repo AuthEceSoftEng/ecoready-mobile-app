@@ -13,7 +13,7 @@ const HomeScreen = ({ navigation }) => {
         >
           <Text style={styles.title}>Welcome to EcoReady!</Text>
           <Text style={styles.subtitle}>
-            Get ready to simplify your life with eco-friendly solutions.
+            Hi! Get ready to simplify your life with eco-friendly solutions.
           </Text>
           <TouchableOpacity
             style={styles.getStartedButton}
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, // Ensures the container fills the screen height
     justifyContent: 'space-between', // Distributes content evenly
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f0f4c3',
   },
   welcomeSection: {
     flex: 0.4, // Take up 40% of the screen
