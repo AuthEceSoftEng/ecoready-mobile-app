@@ -24,7 +24,7 @@ const NewsScreen = () => {
 
   const categoryKeywords = {
     'Food Security': 'food security OR agriculture',
-    Biodiversity: 'biodiversity OR ecosystem',
+    'Biodiversity': 'biodiversity OR ecosystem',
     'Climate Change': 'climate change OR global warming',
   };
 
@@ -159,7 +159,7 @@ const NewsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4c3',
+    backgroundColor: '#f5f5f5',
   },
   tabsContainer: {
     flexDirection: 'row',

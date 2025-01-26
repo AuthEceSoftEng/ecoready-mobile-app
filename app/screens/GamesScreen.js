@@ -58,7 +58,7 @@ function MainScreen({ onSelect }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4c3',
+    backgroundColor: '#f5f5f5',
   },
   mainContainer: {
     flex: 1,
