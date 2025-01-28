@@ -297,11 +297,11 @@ const SectionDetails = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4c3',
+    backgroundColor: '#f5f5f5',
     padding: 15,
   },
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f5f5f5',
     padding: 20,
     marginVertical: 10,
     borderRadius: 12,

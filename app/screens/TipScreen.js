@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center the grid vertically
   },
   card: {
-    width: '40%', // Each card takes up 40% of the available width
+    width: '43%', // Each card takes up 40% of the available width
     height: '30%', // Each card takes up 18% of the screen's height
     borderRadius: 10,
     justifyContent: 'center',
@@ -189,6 +189,8 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
+    marginHorizontal: '3%', // Horizontal margin between cards
+    marginVertical: '3%', // Vertical margin between cards
   },
   cardEmoji: {
     fontSize: 32,

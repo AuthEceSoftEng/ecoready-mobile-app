@@ -2,6 +2,7 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
+import { navigationRef } from './NavigationService'; // Import the navigationRef
 
 // Import your screen components
 import HomeScreen from '../screens/HomeScreen';
@@ -15,7 +16,7 @@ const Tab = createBottomTabNavigator();
 
 const AppNavigator = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={navigationRef}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => {
@@ -41,7 +42,7 @@ const AppNavigator = () => {
             height: 50,
           },
           headerShown: false, // Disable default headers
-          unmountOnBlur: true, // Force each tab to unmount when unfocused
+          unmountOnBlur: true, // <-- Added globally for all tabs
         })}
       >
         {/* Home Tab */}
@@ -77,7 +78,7 @@ const AppNavigator = () => {
               e.preventDefault(); // Prevent default behavior
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Tips' }], // Reset the stack for News tab
+                routes: [{ name: 'Tips' }], // Reset the stack for Tips tab
               });
             },
           })}
