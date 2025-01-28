@@ -1,4 +1,4 @@
-# Development Guide for My App
+# ECO-READY Mobile App
 
 This is the repository of the ECO-READY mobile app. The latest version ot the app is always available at:
 https://github.com/AuthEceSoftEng/ecoready-mobile-app/releases/download/latest/ecoready-android.apk
