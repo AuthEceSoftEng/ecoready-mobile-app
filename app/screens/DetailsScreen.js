@@ -94,6 +94,8 @@ const SectionDetails = ({ route, navigation }) => {
   const [selectedCalculator, setSelectedCalculator] = useState(null);
   const [inputs, setInputs] = useState({});
   const [resultValue, setResultValue] = useState(0);
+  const [errors, setErrors] = useState({});
+  const [showResult, setShowResult] = useState(false);
 
   // Reset state when "reset" param is true
   useFocusEffect(
@@ -125,9 +127,11 @@ const SectionDetails = ({ route, navigation }) => {
     let result = 0;
     switch (selectedCalculator.id) {
       case '1': {
+        if (!validateInputs()) return; // Add this line
         const { transportDistance, vehicleType } = inputs;
         const vehicleEmissions = { car: 0.25, bike: 0.05, bus: 0.1 };
         result = parseFloat(transportDistance || 0) * (vehicleEmissions[vehicleType] || 0);
+        setShowResult(true);
         break;
       }
       case '2': {
@@ -169,7 +173,31 @@ const SectionDetails = ({ route, navigation }) => {
     }
     setResultValue(parseFloat(result.toFixed(2)));
   };
-
+  const validateInputs = () => {
+    let newErrors = {};
+    let isValid = true;
+  
+    if (selectedCalculator?.id === '1') {
+      // Validate transport distance
+      if (!inputs.transportDistance) {
+        newErrors.transportDistance = 'Distance is required';
+        isValid = false;
+      } else if (isNaN(inputs.transportDistance) || inputs.transportDistance < 0) {
+        newErrors.transportDistance = 'Please enter a valid positive number';
+        isValid = false;
+      }
+  
+      // Validate vehicle type
+      if (!inputs.vehicleType) {
+        newErrors.vehicleType = 'Please select a vehicle type';
+        isValid = false;
+      }
+    }
+  
+    setErrors(newErrors);
+    return isValid;
+  };
+  
   const renderMeter = () => {
     const getColor = (value, maxValue) => {
       const ratio = value / maxValue;
@@ -181,8 +209,28 @@ const SectionDetails = ({ route, navigation }) => {
     const color = getColor(resultValue, 100);
 
     switch (selectedCalculator?.id) {
-      case '1':
-        return <ThermometerMeter value={resultValue} maxValue={100} unit="kg CO₂" color={color} />;
+        case '1':
+            return (
+              <View style={styles.meterContentContainer}>
+                <Text style={styles.resultLabel}>Your Carbon Footprint:</Text>
+                <ThermometerMeter 
+                  value={resultValue} 
+                  maxValue={100} 
+                  unit="kg CO₂" 
+                  color={color} 
+                  style={styles.thermometerSize}  // Add this line
+                />
+                {resultValue > 0 && (
+                  <Text style={styles.resultNote}>
+                    {resultValue <= 2 
+                      ? '✨ Great! Your carbon footprint is low.'
+                      : resultValue <= 5
+                      ? '⚠️ Moderate impact. Consider eco-friendly alternatives.'
+                      : '⚠️ High impact. Try reducing car usage when possible.'}
+                  </Text>
+                )}
+              </View>
+            );
       case '2':
         return <WaveMeter value={resultValue} maxValue={500} unit="Liters/day" color={color} />;
       case '3': {
@@ -234,15 +282,26 @@ const SectionDetails = ({ route, navigation }) => {
 
   const inputFields = {
     '1': [
-      { label: 'Transport Distance (km/day)', key: 'transportDistance', type: 'number' },
-      {
-        label: 'Vehicle Type',
-        key: 'vehicleType',
-        type: 'dropdown',
-        options: ['car', 'bike', 'bus'],
-        defaultOption: 'Select Vehicle Type',
-      },
-    ],
+        { 
+            label: 'Daily Transport Distance (km)', 
+            key: 'transportDistance', 
+            type: 'number',
+            placeholder: 'Enter distance'
+        },
+        {
+            label: 'Vehicle Type',
+            key: 'vehicleType',
+            type: 'dropdown',
+            options: [
+            { label: 'Car', value: 'car' },
+            { label: 'Bus', value: 'bus' },
+            { label: 'Bike', value: 'bike' },
+            { label: 'Train', value: 'train' },
+            { label: 'Motorcycle', value: 'motorcycle' }
+            ],
+            defaultOption: 'Select Vehicle Type',
+        },
+     ],
     '2': [
       { label: 'Daily Showers', key: 'dailyShowers', type: 'number' },
       { label: 'Daily Cooking Sessions', key: 'dailyCooking', type: 'number' },
@@ -273,37 +332,65 @@ const SectionDetails = ({ route, navigation }) => {
   };
 
   const renderInputFields = () => (
-    <View style={styles.form}>
+    <View style={styles.inputsContainer}>
       {inputFields[selectedCalculator.id].map((field) => (
         <View key={field.key} style={styles.inputContainer}>
           <Text style={styles.label}>{field.label}:</Text>
           {field.type === 'number' ? (
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Enter value"
-              onChangeText={(value) =>
-                setInputs((prev) => ({ ...prev, [field.key]: parseFloat(value) || 0 }))
-              }
-            />
+            <>
+              <TextInput
+                style={[
+                  styles.input,
+                  errors[field.key] && styles.inputError
+                ]}
+                keyboardType="numeric"
+                placeholder={field.placeholder || "Enter value"}
+                value={inputs[field.key]?.toString()}
+                onChangeText={(value) => {
+                  setInputs((prev) => ({ ...prev, [field.key]: value }));
+                  setErrors((prev) => ({ ...prev, [field.key]: null }));
+                }}
+              />
+              {errors[field.key] && (
+                <Text style={styles.errorText}>{errors[field.key]}</Text>
+              )}
+            </>
           ) : (
-            <Picker
-              selectedValue={inputs[field.key]}
-              style={styles.picker}
-              onValueChange={(value) =>
-                setInputs((prev) => ({ ...prev, [field.key]: value }))
-              }
-            >
-              <Picker.Item label={field.defaultOption} value="" />
-              {field.options.map((option) => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
+            <>
+              <View style={[
+                styles.pickerContainer,
+                errors[field.key] && styles.inputError
+              ]}>
+                <Picker
+                  selectedValue={inputs[field.key]}
+                  style={styles.picker}
+                  onValueChange={(value) => {
+                    setInputs((prev) => ({ ...prev, [field.key]: value }));
+                    setErrors((prev) => ({ ...prev, [field.key]: null }));
+                  }}
+                >
+                  <Picker.Item label={field.defaultOption} value="" />
+                  {field.options.map((option) => (
+                    <Picker.Item 
+                      key={option.value} 
+                      label={option.label} 
+                      value={option.value} 
+                    />
+                  ))}
+                </Picker>
+              </View>
+              {errors[field.key] && (
+                <Text style={styles.errorText}>{errors[field.key]}</Text>
+              )}
+            </>
           )}
         </View>
       ))}
-      <TouchableOpacity onPress={handleCalculate} style={styles.calculateButton}>
-        <Text style={styles.calculateButtonText}>Calculate</Text>
+      <TouchableOpacity 
+        onPress={handleCalculate} 
+        style={styles.calculateButton}
+      >
+        <Text style={styles.calculateButtonText}>Calculate Emissions</Text>
       </TouchableOpacity>
     </View>
   );
@@ -335,6 +422,7 @@ const SectionDetails = ({ route, navigation }) => {
   const renderContent = () => {
     if (selectedCalculator) {
       return (
+        <View style={styles.fixedContainer}>
         <View style={styles.detailsContainer}>
           <View style={[styles.selectedHeader, { backgroundColor: selectedCalculator.bgColor }]}>
             <Text style={styles.selectedHeaderIcon}>{selectedCalculator.icon}</Text>
@@ -348,6 +436,7 @@ const SectionDetails = ({ route, navigation }) => {
           <View style={styles.meterContainer}>
             {renderMeter()}
           </View>
+        </View>
         </View>
       );
     }
@@ -379,122 +468,167 @@ const SectionDetails = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  headerContainer: {
-    justifyContent: 'center', // Center content vertically
-    alignItems: 'center', // Center content horizontally
-    padding: 10, // Add some padding
-    backgroundColor: '#f5f5f5', // Optional background color
-  },
-  headerTitle: {
-    fontSize: Math.min(windowWidth * 0.07, 28),
-    fontWeight: 'bold',
-    color: '#1E4E75',
-    textAlign: 'center',
-    justifyContent: 'center',
-  },
-  subtitle: {
-    fontSize: Math.min(windowWidth * 0.04, 16),
-    color: '#667',
-    textAlign: 'center',
-    marginTop: windowHeight * 0.001,
-  },
-  listContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-  },
-  row: {
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    margin: windowHeight * 0.01,
-    flexGrow: 1,
-    height: '30%',
-  },
-  card: {
-    flexGrow: 0.2,
-    borderRadius: 15,
-    borderWidth: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    width: '45%',
-    height: "100%",
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardContent: { 
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  icon: {
-    fontSize: Math.min(windowWidth * 0.08, 32),
-    marginBottom: windowHeight * 0.01,
-  },
-  cardTitle: {
-    fontSize: Math.min(windowWidth * 0.04, 16),
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: windowHeight * 0.01,
-  },
-  unit: {
-    fontSize: Math.min(windowWidth * 0.03, 12),
-    textAlign: 'center',
-  },
-  detailsContainer: {
-    flex: 1,
-    justifyContent: 'space-between',
-  },
-  selectedHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: windowHeight * 0.02,
-  },
-  selectedHeaderIcon: {
-    fontSize: Math.min(windowWidth * 0.08, 32),
-    marginRight: 10,
-  },
-  selectedHeaderText: {
-    fontSize: Math.min(windowWidth * 0.06, 24),
-    fontWeight: 'bold',
-  },
-  inputsContainer: {
-    flex: 1,
-    paddingVertical: windowHeight * 0.02,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: windowHeight * 0.015,
-    backgroundColor: '#ffffff',
-    fontSize: Math.min(windowWidth * 0.04, 16),
-  },
-  calculateButton: {
-    backgroundColor: '#1E4E75',
-    padding: windowHeight * 0.02,
-    borderRadius: 8,
-    marginVertical: windowHeight * 0.02,
-  },
-  calculateButtonText: {
-    color: '#ffffff',
-    fontSize: Math.min(windowWidth * 0.045, 18),
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  meterContainer: {
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    padding: windowHeight * 0.02,
-    borderRadius: 12,
-    marginTop: 'auto',
-  }
-});
+    container: {
+      flex: 1,
+      backgroundColor: '#f5f5f5',
+    },
+    fixedContainer: {
+        height: windowHeight * 0.75,
+    },
+    headerContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 10,
+      backgroundColor: '#f5f5f5',
+    },
+    headerTitle: {
+      fontSize: Math.min(windowWidth * 0.07, 28),
+      fontWeight: 'bold',
+      color: '#1E4E75',
+      textAlign: 'center',
+      justifyContent: 'center',
+    },
+    subtitle: {
+      fontSize: Math.min(windowWidth * 0.04, 16),
+      color: '#667',
+      textAlign: 'center',
+      marginTop: windowHeight * 0.001,
+    },
+    listContainer: {
+      flexGrow: 1,
+      justifyContent: 'center',
+    },
+    row: {
+      justifyContent: 'space-around',
+      alignItems: 'center',
+      margin: windowHeight * 0.01,
+      flexGrow: 1,
+      height: '30%',
+    },
+    card: {
+      flexGrow: 0.2,
+      borderRadius: 15,
+      borderWidth: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 5,
+      width: '45%',
+      height: "100%",
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    cardContent: { 
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    icon: {
+      fontSize: Math.min(windowWidth * 0.08, 32),
+      marginBottom: windowHeight * 0.01,
+    },
+    cardTitle: {
+      fontSize: Math.min(windowWidth * 0.04, 16),
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: windowHeight * 0.01,
+    },
+    unit: {
+      fontSize: Math.min(windowWidth * 0.03, 12),
+      textAlign: 'center',
+    },
+    detailsContainer: {
+        flex: 1,
+        padding: 10,
+        alignItems: 'center',
+      },
+      selectedHeader: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#E8F5E9',
+        borderRadius: 12,
+        width: '100%',
+      },
+      selectedHeaderIcon: {
+        fontSize: Math.min(windowWidth * 0.08, 32),
+        marginLeft: '5%',
+      },
+      selectedHeaderText: {
+        fontSize: Math.min(windowWidth * 0.06, 24),
+        fontWeight: 'bold',
+        marginLeft: '2%',
+      },
+      inputsContainer: {
+        flex: 3, // Takes 4 parts out of 9 total (roughly 40%)
+        marginVertical: 10,
+      },
+      inputContainer: {
+        flex: 1,
+        marginVertical: 5,
+        maxHeight: 90,
+      },
+      label: {
+        fontSize: Math.min(windowWidth * 0.04, 16),
+        color: '#333',
+        marginBottom: 5,
+      },
+      input: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        backgroundColor: '#ffffff',
+        paddingHorizontal: 10,
+      },
+      pickerContainer: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        backgroundColor: '#ffffff',
+        overflow: 'hidden',
+      },
+      picker: {
+        flex: 1,
+      },
+      calculateButton: {
+        backgroundColor: '#1E4E75',
+        borderRadius: 8,
+        alignItems: 'center',
+      },
+      calculateButtonText: {
+        color: '#ffffff',
+        fontSize: Math.min(windowWidth * 0.045, 18),
+        fontWeight: 'bold',
+      },
+      meterContainer: {
+        flex: 4, // Takes 4 parts out of 9 total (roughly 40%)
+        backgroundColor: '#ffffff',
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      },
+      meterContentContainer: {
+        flex: 1,
+        width: '50%',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      },
+      thermometerSize: {
+        flex: 1,
+        width: '90%',
+      },
+      resultLabel: {
+        fontSize: Math.min(windowWidth * 0.04, 16),
+        textAlign: 'center',
+      },
+      resultNote: {
+        fontSize: Math.min(windowWidth * 0.035, 14),
+        textAlign: 'center',
+        color: '#667',
+      }
+    });
 
 export default SectionDetails;

@@ -28,17 +28,17 @@ const ThermometerMeter = ({ value, maxValue, unit }) => {
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginVertical: 20,
   },
   thermometer: {
-    width: 50,
-    height: 200,
+    height: "60%",
+    aspectRatio: 0.3,
     borderRadius: 25,
     backgroundColor: '#EEE',
     justifyContent: 'flex-end',
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: '#AAA',
+    maxWidth: 80,
   },
   fill: {
     width: '100%',
