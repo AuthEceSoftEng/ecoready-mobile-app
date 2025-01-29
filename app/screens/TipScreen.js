@@ -97,7 +97,7 @@ const TipsScreen = () => {
   return (
     <View style={styles.container}>
       {/* Title */}
-      <Text style={styles.title}>Eco-Friendly Tips</Text>
+      <Text style={styles.title}>ECO Tips</Text>
 
       {/* Categories Grid */}
       <View style={styles.grid}>
@@ -164,6 +164,7 @@ const styles = StyleSheet.create({
     color: '#1E4E75',
     textAlign: 'center',
     marginBottom: 10,
+    height: '8%',
   },
   subtitle: {
     fontSize: 16,
@@ -172,25 +173,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   grid: {
+    height: '90%',
     flex: 1,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center', // Center the grid horizontally
+    justifyContent: 'space-between', // Center the grid horizontally
     alignItems: 'center', // Center the grid vertically
   },
   card: {
-    width: '43%', // Each card takes up 40% of the available width
-    height: '30%', // Each card takes up 18% of the screen's height
+    width: '45%', // Each card takes up 45% of the available width
+    height: '30%', // Each card takes up 30% of the screen's height
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: '2%', // Add equal margins around the cards
+    margin: '2.5%', // 5% margin around each card
     elevation: 3,
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 5,
-    marginHorizontal: '3%', // Horizontal margin between cards
-    marginVertical: '3%', // Vertical margin between cards
   },
   cardEmoji: {
     fontSize: 32,

@@ -73,7 +73,16 @@ const calculators = [
     icon: '🚗',
     color: '#9C27B0',
     bgColor: '#F3E5F5'
-  }
+  },
+  { 
+    id: '6', 
+    name: 'Transport Impact', 
+    unit: 'kg CO₂/day', 
+    meter: 'Bar Graph',
+    icon: '🚗',
+    color: '#9C27B0',
+    bgColor: '#F3E5F5'
+  },
 ];
 
 // Dynamic window dimensions
@@ -345,8 +354,10 @@ const SectionDetails = ({ route, navigation }) => {
 
     return (
       <>
-        <Text style={styles.headerTitle}>Eco Calculator</Text>
-        <Text style={styles.subtitle}>Track your environmental impact</Text>
+        <View style={styles.headerContainer}>
+            <Text style={styles.headerTitle}>Eco-Calculators</Text>
+            <Text style={styles.subtitle}>Track your environmental impact</Text>
+        </View>        
         <FlatList
           data={calculators}
           keyExtractor={(item) => item.id}
@@ -371,43 +382,52 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    padding: 15,
-    height: windowHeight,
+  },
+  headerContainer: {
+    justifyContent: 'center', // Center content vertically
+    alignItems: 'center', // Center content horizontally
+    padding: 10, // Add some padding
+    backgroundColor: '#f5f5f5', // Optional background color
   },
   headerTitle: {
     fontSize: Math.min(windowWidth * 0.07, 28),
     fontWeight: 'bold',
     color: '#1E4E75',
     textAlign: 'center',
-    marginVertical: windowHeight * 0.001,
+    justifyContent: 'center',
   },
   subtitle: {
     fontSize: Math.min(windowWidth * 0.04, 16),
     color: '#667',
     textAlign: 'center',
-    marginBottom: windowHeight * 0.01,
+    marginTop: windowHeight * 0.001,
   },
   listContainer: {
-    flexGrow: 0,
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   row: {
-    justifyContent: 'space-between',
-    marginBottom: windowHeight * 0.02,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    margin: windowHeight * 0.01,
+    flexGrow: 1,
+    height: '30%',
   },
   card: {
-    width: 0.43*windowWidth,
-    height: 0.2*windowHeight,
+    flexGrow: 0.2,
     borderRadius: 15,
-    padding: 15,
     borderWidth: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
+    width: '45%',
+    height: "100%",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  cardContent: {
-    flex: 1,
+  cardContent: { 
     justifyContent: 'center',
     alignItems: 'center',
   },
