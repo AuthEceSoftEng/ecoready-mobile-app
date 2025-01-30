@@ -2,7 +2,7 @@
   "expo": {
     "name": "ECOReady",
     "slug": "ECOReady",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dnn363.EcoReady"
+      "bundleIdentifier": "com.dnn363.myapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -38,7 +38,7 @@
         "projectId": "2c095bee-7b9e-4342-9595-2f701c6282d5"
       }
     },
-    "runtimeVersion": "1.0.1"
+    "runtimeVersion": "1.0.2"
 
   }
 }
