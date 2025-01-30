@@ -97,7 +97,7 @@ const TipsScreen = () => {
   return (
     <View style={styles.container}>
       {/* Title */}
-      <Text style={styles.title}>ECO Tips</Text>
+      <Text style={styles.title}>Eco Tips</Text>
 
       {/* Categories Grid */}
       <View style={styles.grid}>

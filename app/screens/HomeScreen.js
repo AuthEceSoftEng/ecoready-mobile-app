@@ -54,7 +54,7 @@ const HomeScreen = ({ navigation }) => {
           resizeMode="cover"
         >
           <Text style={[styles.title, { fontSize: width * 0.06 }]}>
-            Welcome to ECOReady!
+            Welcome to ECO-Ready!
           </Text>
           <Text
             style={[
