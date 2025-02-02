@@ -33,19 +33,19 @@ const InputFields = ({ selectedCalculator, inputs, setInputs, handleCalculate })
           { label: '☀️ Solar Panel Cost (€)', key: 'solarPanelCost', type: 'number', placeholder: 'Enter system cost' },
         ],
         '5': [
-          { label: '💪 Daily Protein Intake (grams)', key: 'proteinIntake', type: 'slider', min: 0, max: 2000, step: 10 },
-          { 
-            label: '🍽 Protein Source', key: 'proteinSource', type: 'dropdown',
-            options: [
-              { label: 'Beef', value: 'beef' }, 
-              { label: 'Chicken', value: 'chicken' }, 
-              { label: 'Fish', value: 'fish' },
-              { label: 'Eggs', value: 'eggs' },
-              { label: 'Dairy', value: 'dairy' },
-              { label: 'Plant-based', value: 'plant' }
-            ],
-            defaultOption: 'Select Protein Source',
-          },
+        { label: '💪 Daily Protein Intake (grams)', key: 'proteinIntake', type: 'slider', min: 0, max: 2000, step: 10 },
+            { 
+                label: '🍽 Protein Source', key: 'proteinSource', type: 'dropdown',
+                options: [
+                    { label: 'Beef', value: 'beef' }, 
+                    { label: 'Chicken', value: 'chicken' }, 
+                    { label: 'Fish', value: 'fish' },
+                    { label: 'Eggs', value: 'eggs' },
+                    { label: 'Dairy', value: 'dairy' },
+                    { label: 'Plant-based', value: 'plant' }
+                ],
+                defaultOption: 'Select Protein Source',
+            },
         ],
         '6': [
           { label: '🛍️ Small Bags (Grocery bag, ~0.5 kg)', key: 'smallBags', type: 'slider', min: 0, max: 20, step: 1 },

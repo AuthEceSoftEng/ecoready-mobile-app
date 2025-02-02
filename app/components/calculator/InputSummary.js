@@ -25,17 +25,13 @@ const InputSummary = ({ selectedCalculator, inputs }) => {
       { label: '🔆 Solar Panel Investment', value: inputs.solarPanelCost ? `$${inputs.solarPanelCost}` : "Not provided" }
     ],
     '5': [
-      { label: '🥩 Protein Intake (Beef)', value: inputs.beef ? `${inputs.beef}g` : "0g" },
-      { label: '🍗 Protein Intake (Chicken)', value: inputs.chicken ? `${inputs.chicken}g` : "0g" },
-      { label: '🐟 Protein Intake (Fish)', value: inputs.fish ? `${inputs.fish}g` : "0g" },
-      { label: '🥚 Protein Intake (Eggs)', value: inputs.eggs ? `${inputs.eggs}g` : "0g" },
-      { label: '🧀 Protein Intake (Dairy)', value: inputs.dairy ? `${inputs.dairy}g` : "0g" },
-      { label: '🌿 Protein Intake (Plant)', value: inputs.plant ? `${inputs.plant}g` : "0g" }
-    ],
+            { label: '💪 Protein Intake', value: inputs.proteinIntake ? `${inputs.proteinIntake}g` : "0g" },
+            { label: '🍽 Protein Source', value: inputs.proteinSource ? inputs.proteinSource.charAt(0).toUpperCase() + inputs.proteinSource.slice(1) : "Not selected" }
+        ],
     '6': [
       { label: '♻️ Small Bags', value: inputs.smallBags ? `${inputs.smallBags} bags` : "0 bags" },
       { label: '🗑️ Medium Bags', value: inputs.mediumBags ? `${inputs.mediumBags} bags` : "0 bags" },
-      { label: '🛢️ Large Bins', value: inputs.largeBins ? `${inputs.largeBins} bins` : "0 bins" }
+      { label: '🛢️ Large Bins', value: inputs.largeBins ? `${inputs.largeBags} bins` : "0 bins" }
     ],
   };
 

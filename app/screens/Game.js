@@ -118,6 +118,7 @@ export default function Game({ onExit }) {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.mainTitle}>🌍 Eco Strategy Game 🌱</Text>
       <Text style={styles.yearText}>📅 Year: {currentYear} / 10</Text>
       <Text style={styles.scenarioText}>{decisions[currentScenario].scenario}</Text>
       {decisions[currentScenario].options.map((option, index) => (
@@ -142,7 +143,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     padding: 16,
     backgroundColor: '#f1f8e9',
   },
@@ -192,5 +193,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  mainTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 20,
+    textAlign: 'center',
+    paddingHorizontal: 10,
   },
 });
