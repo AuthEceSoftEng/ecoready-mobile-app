@@ -29,7 +29,7 @@ Follow these steps to clone the repository and run the app:
 git clone https://https://github.com/AuthEceSoftEng/ecoready-mobile-app.git
 
 # Navigate to the project directory
-cd my-app
+cd ecoready-mobile-app
 
 # Install dependencies
 npm install
