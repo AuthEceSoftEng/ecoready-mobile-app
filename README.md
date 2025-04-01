@@ -81,8 +81,4 @@ During development, you can see changes as follows:
 - **Development APK**: If you modify native modules or `app.json`, you must rebuild the APK.
 ```
 
----
 
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
