@@ -12,12 +12,12 @@ import {
   ScrollView,
 } from 'react-native';
 
-const API_KEY = 'ac4bb526-a322-47da-8220-89ea340fe698'; 
+const API_KEY = 'ac4bb526-a322-47da-8220-89ea340fe698';
 const BASE_URL = 'https://eventregistry.org/api/v1/article/getArticles';
 
 const NewsScreen = () => {
   const [activeTab, setActiveTab] = useState('Food Security');
-  const [newsData, setNewsData] = useState([]);
+  const [newsCache, setNewsCache] = useState({});
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -28,12 +28,22 @@ const NewsScreen = () => {
     'Climate Change': 'climate change OR global warming',
   };
 
-  const fetchNews = async () => {
+  const fetchNewsIfNeeded = async (category) => {
+    const oneHour = 60 * 60 * 1000;
+    const now = Date.now();
+    const cached = newsCache[category];
+
+    if (cached && now - cached.timestamp < oneHour) {
+      console.log('Using cached data for', category);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const requestBody = {
         action: 'getArticles',
-        keyword: categoryKeywords[activeTab],
+        keyword: categoryKeywords[category],
         articlesPage: 1,
         articlesCount: 10,
         articlesSortBy: 'date',
@@ -52,7 +62,13 @@ const NewsScreen = () => {
 
       const data = await response.json();
       if (data && data.articles && data.articles.results) {
-        setNewsData(data.articles.results);
+        setNewsCache((prev) => ({
+          ...prev,
+          [category]: {
+            articles: data.articles.results,
+            timestamp: now,
+          },
+        }));
       } else {
         console.error('Error fetching news: No results returned');
       }
@@ -64,7 +80,7 @@ const NewsScreen = () => {
   };
 
   useEffect(() => {
-    fetchNews();
+    fetchNewsIfNeeded(activeTab);
   }, [activeTab]);
 
   const openModal = (article) => {
@@ -103,7 +119,9 @@ const NewsScreen = () => {
       <View style={styles.tabsContainer}>
         {Object.keys(categoryKeywords).map((tab) => (
           <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)}>
-            <Text style={[styles.tab, activeTab === tab && styles.activeTab]}>{tab}</Text>
+            <Text style={[styles.tab, activeTab === tab && styles.activeTab]}>
+              {tab}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -113,7 +131,7 @@ const NewsScreen = () => {
         <ActivityIndicator size="large" color="#1E4E75" style={styles.loader} />
       ) : (
         <FlatList
-          data={newsData}
+          data={newsCache[activeTab]?.articles || []}
           renderItem={renderNewsItem}
           keyExtractor={(item, index) => index.toString()}
           contentContainerStyle={styles.newsList}
