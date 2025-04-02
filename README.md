@@ -29,7 +29,7 @@ Follow these steps to clone the repository and run the app:
 git clone https://https://github.com/AuthEceSoftEng/ecoready-mobile-app.git
 
 # Navigate to the project directory
-cd my-app
+cd ecoready-mobile-app
 
 # Install dependencies
 npm install
@@ -81,8 +81,4 @@ During development, you can see changes as follows:
 - **Development APK**: If you modify native modules or `app.json`, you must rebuild the APK.
 ```
 
----
 
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
