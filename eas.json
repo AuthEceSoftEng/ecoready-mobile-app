@@ -19,6 +19,13 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "asymeon@issel.ee.auth.gr",
+        "ascAppId": "6451386609",
+        "appleTeamId": "J6R5ZEA62L",
+        "sku": "gr.auth.ee.issel.ecoready"
+      }
+    }
   }
 }

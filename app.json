@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "ECOReady",
-    "slug": "ECOReady",
+    "slug": "ecoready",
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
@@ -14,14 +14,15 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dnn363.myapp"
+      "bundleIdentifier": "gr.auth.ee.issel.ecoready"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.dnn363.myapp"
+      "targetSdkVersion": 35,
+      "package": "gr.auth.ee.issel.ecoready"
     },
     "web": {
       "favicon": "./assets/logo.png"
@@ -32,13 +33,27 @@
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/2c095bee-7b9e-4342-9595-2f701c6282d5"
     },
-    "owner": "dnn363",
+    "owner": "issel",
     "extra": {
       "eas": {
-        "projectId": "2c095bee-7b9e-4342-9595-2f701c6282d5"
+        "projectId": "65c1b6b1-7d28-4c37-8fb9-2dc848f81990"
       }
     },
-    "runtimeVersion": "1.0.2"
-
+    "runtimeVersion": "1.0.2",
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.1"
+          }
+        }
+      ]
+    ]
   }
 }
