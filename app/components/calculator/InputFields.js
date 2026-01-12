@@ -2,12 +2,25 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker'; // Correct Picker import
 import Slider from '@react-native-community/slider';
+import foodDatabase from '../../data/foodNutritionDB.json';
 
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
 const InputFields = ({ selectedCalculator, inputs, setInputs, handleCalculate }) => {
     const [sliderTempValues, setSliderTempValues] = useState({});
+    
+    // Get foods filtered by category - memoize based on category
+    const getFoodsForCategory = (category) => {
+      if (!category) return foodDatabase.foods;
+      return foodDatabase.foods.filter(f => f.category === category);
+    };
+    
+    // Get current food options based on selected category
+    const currentFoodOptions = React.useMemo(() => {
+      return getFoodsForCategory(inputs.foodCategory).map(f => ({ label: f.name, value: f.id }));
+    }, [inputs.foodCategory]);
+    
     const inputFields = {
         '1': [
           { label: '🌍 Transport Distance (km)', key: 'transportDistance', type: 'number', placeholder: 'Enter distance' },
@@ -23,9 +36,24 @@ const InputFields = ({ selectedCalculator, inputs, setInputs, handleCalculate })
           { label: '👕 Weekly Laundry Loads', key: 'weeklyLaundry', type: 'slider', min: 0, max: 20, step: 1 },
         ],
         '3': [
-          { label: '🥩 Meat (portions/day)', key: 'meat', type: 'slider', min: 0, max: 5, step: 1 },
-          { label: '🥦 Vegetables (portions/day)', key: 'vegetables', type: 'slider', min: 0, max: 10, step: 1 },
-          { label: '🌾 Grains (portions/day)', key: 'grains', type: 'slider', min: 0, max: 10, step: 1 },
+          { 
+            label: '📦 Food Category', key: 'foodCategory', type: 'dropdown',
+            options: [
+              { label: 'Proteins', value: 'Proteins' },
+              { label: 'Dairy', value: 'Dairy' },
+              { label: 'Grains', value: 'Grains' },
+              { label: 'Vegetables', value: 'Vegetables' },
+              { label: 'Fruits', value: 'Fruits' },
+              { label: 'Oils', value: 'Oils' }
+            ],
+            defaultOption: 'Select Category',
+          },
+          { 
+            label: '🍽 Food Item', key: 'foodItem', type: 'dropdown',
+            options: currentFoodOptions,
+            defaultOption: 'Select Food',
+          },
+          { label: '⚖️ Serving Size (grams)', key: 'servingSize', type: 'number', placeholder: 'Enter grams (e.g., 100)' },
         ],
         '4': [
           { label: '⚡ Monthly Energy Usage (kWh)', key: 'energyUsage', type: 'number', placeholder: 'Enter kWh' },
@@ -104,12 +132,23 @@ const InputFields = ({ selectedCalculator, inputs, setInputs, handleCalculate })
           ) : (
             <View style={styles.pickerContainer}>
                 <Picker
-                    selectedValue={inputs[field.key] ?? ""}
+                    selectedValue={inputs[field.key] || ""}
                     onValueChange={(value) => {
-                        setInputs((prev) => ({
+                        if (value === "") return; // Ignore selecting the placeholder
+                        
+                        // Reset food item when category changes
+                        if (field.key === 'foodCategory') {
+                          setInputs((prev) => ({
                             ...prev,
-                            [field.key]: value !== "" ? value : undefined, // Ensure default is not empty
-                        }));
+                            [field.key]: value,
+                            foodItem: '', // Reset food selection when category changes
+                          }));
+                        } else {
+                          setInputs((prev) => ({
+                            ...prev,
+                            [field.key]: value,
+                          }));
+                        }
                     }}
                     style={styles.picker}
                 >
@@ -243,15 +282,22 @@ const styles = StyleSheet.create({
     pickerContainer: {
       width: '100%',
       borderWidth: 2,
-      borderColor: '#B0C4DE',
+      borderColor: '#1E4E75',
       borderRadius: 12,
-      backgroundColor: '#F8FAFC',
+      backgroundColor: '#fff',
       overflow: 'hidden',
-      alignItems: 'center',
+      marginBottom: 5,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
     },
     picker: {
       width: '100%',
-      backgroundColor: '#F8FAFC',
+      height: 55,
+      backgroundColor: '#fff',
+      color: '#1E4E75',
     },
   });
     

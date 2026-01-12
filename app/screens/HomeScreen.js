@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   StyleSheet,
@@ -16,7 +15,7 @@ const HomeScreen = ({ navigation }) => {
   const cardsData = [
     {
       title: 'Eco News',
-      description: 'Latest news on Food Security, Climate Change, and Sustainability.',
+      description: 'Latest news and updates on food security and environmental topics.',
       targetTab: 'News',
     },
     {
@@ -45,8 +44,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={common.safeArea}>
-      <View style={styles.container}>
+    <View style={styles.container}>
         {/* Welcome Section */}
         <ImageBackground
           source={require('../assets/images/image.png')}
@@ -122,7 +120,6 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </View>
       </View>
-    </SafeAreaView>
   );
 };
 

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { SafeAreaView, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native'; // Import navigation hooks
 import Game from './Game';
 import Quiz from './Quiz';
+import EcoReadyGame from './EcoReadyGame';
 
 export default function GamesScreen() {
-  const [screen, setScreen] = useState('main'); // 'main', 'quiz', or 'strategy'
+  const [screen, setScreen] = useState('main'); // 'main', 'quiz', 'strategy', or 'ecoready'
   const navigation = useNavigation();
   const route = useRoute();
 
@@ -26,17 +27,19 @@ export default function GamesScreen() {
         return <Quiz onExit={() => setScreen('main')} />;
       case 'strategy':
         return <Game onExit={() => setScreen('main')} />;
+      case 'ecoready':
+        return <EcoReadyGame navigation={navigation} route={{ params: { reset: false } }} onExit={() => setScreen('main')} />;
       default:
         return <MainScreen onSelect={(game) => setScreen(game)} />;
     }
   };
 
-  return <SafeAreaView style={styles.container}>{renderScreen()}</SafeAreaView>;
+  return <View style={styles.container}>{renderScreen()}</View>;
 }
 
 function MainScreen({ onSelect }) {
   return (
-    <SafeAreaView style={styles.mainContainer}>
+    <View style={styles.mainContainer}>
       <Text style={styles.header}>🎮 Game Hub</Text>
       <Text style={styles.description}>Choose a game to start playing!</Text>
       <TouchableOpacity
@@ -51,7 +54,13 @@ function MainScreen({ onSelect }) {
       >
         <Text style={styles.buttonText}>🌍 Climate Strategy Game</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => onSelect('ecoready')}
+      >
+        <Text style={styles.buttonText}>🌱 Your Food Future</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 

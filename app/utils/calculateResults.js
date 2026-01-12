@@ -1,3 +1,6 @@
+import foodDatabase from '../data/foodNutritionDB.json';
+import { generateAlert, getSuggestions } from './nutritionAlerts';
+
 export const calculateResults = (selectedCalculator, inputs) => {
   let result = 0;
 
@@ -22,15 +25,30 @@ export const calculateResults = (selectedCalculator, inputs) => {
       break;
     }
     case '3': { // 🍽️ Calorie & Nutrition Impact (kg CO₂)
-      const { meat, vegetables, grains } = inputs;
-      const calorieCO2Impact = { 
-        meat: 27,        // kg CO₂ per portion
-        vegetables: 3,  
-        grains: 5
-      };
-      result = ((parseFloat(meat) || 0) * calorieCO2Impact.meat) +
-               ((parseFloat(vegetables) || 0) * calorieCO2Impact.vegetables) +
-               ((parseFloat(grains) || 0) * calorieCO2Impact.grains);
+      const { foodItem, servingSize } = inputs;
+      
+      if (!foodItem || !servingSize) {
+        result = { carbonEmission: 0, food: null, alert: null, suggestions: [] };
+        break;
+      }
+      
+      const food = foodDatabase.foods.find(f => f.id === foodItem);
+      if (food) {
+        const servingKg = parseFloat(servingSize) / 1000;
+        const carbonEmission = food.carbonPerKg * servingKg;
+        const alert = generateAlert(food, servingKg);
+        const suggestions = getSuggestions(food);
+        
+        result = {
+          carbonEmission: parseFloat(carbonEmission.toFixed(2)),
+          food: food,
+          servingSize: parseFloat(servingSize),
+          alert: alert,
+          suggestions: suggestions.slice(0, 3)
+        };
+      } else {
+        result = { carbonEmission: 0, food: null, alert: null, suggestions: [] };
+      }
       break;
     }
     case '4': { // ⚡ Renewable Energy Savings

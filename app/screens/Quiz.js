@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView, Alert } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { saveQuizResult, calculateStats } from '../utils/progressStorage';
+import FeedbackModal from '../components/FeedbackModal';
+import { shouldShowFeedback, incrementSessionCounter, resetFeedbackCounters } from '../utils/feedbackFrequency';
+
 const TOTAL_QUESTIONS = 10; // Constant to ensure consistent question count
 
 const questionPool = [
@@ -170,6 +175,10 @@ export default function Quiz({ onExit }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [showExplanation, setShowExplanation] = useState(false);
+  const [userAnswers, setUserAnswers] = useState([]); // Track all answers
+  const [stats, setStats] = useState(null); // User stats
+  const [showReview, setShowReview] = useState(false); // Review mode
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false); // Feedback modal state
   
 
 
@@ -180,7 +189,14 @@ export default function Quiz({ onExit }) {
       return shuffled.slice(0, TOTAL_QUESTIONS);
     };
     setQuestions(getRandomQuestions());
+    loadStats(); // Load user stats
   }, []);
+
+  // Load user statistics
+  const loadStats = async () => {
+    const userStats = await calculateStats();
+    setStats(userStats);
+  };
 
   // Handle back button press
   useEffect(() => {
@@ -201,19 +217,53 @@ export default function Quiz({ onExit }) {
   
   const handleAnswer = (selectedOption) => {
     setSelectedOption(selectedOption);
-    if (questions[currentQuestionIndex].answer === selectedOption) {
+    const isCorrect = questions[currentQuestionIndex].answer === selectedOption;
+    
+    if (isCorrect) {
       setScore(score + 1);
     }
+
+    // Save user's answer
+    const answerData = {
+      question: questions[currentQuestionIndex].question,
+      userAnswer: selectedOption,
+      correctAnswer: questions[currentQuestionIndex].answer,
+      isCorrect,
+      explanation: questions[currentQuestionIndex].explanation,
+    };
+    setUserAnswers([...userAnswers, answerData]);
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
     const nextQuestionIndex = currentQuestionIndex + 1;
     if (nextQuestionIndex < questions.length) {
       setCurrentQuestionIndex(nextQuestionIndex);
       setSelectedOption(null);
     } else {
+      // Save quiz result
+      await saveQuizResultToStorage();
       setShowScore(true);
+      // Increment session counter
+      await incrementSessionCounter();
+      // Show feedback modal after a short delay (only if it's time)
+      const shouldShow = await shouldShowFeedback();
+      if (shouldShow) {
+        setTimeout(() => setShowFeedbackModal(true), 1000);
+      }
     }
+  };
+
+  const saveQuizResultToStorage = async () => {
+    const quizData = {
+      score,
+      totalQuestions: questions.length,
+      answers: userAnswers,
+      date: new Date().toISOString(),
+    };
+    
+    await saveQuizResult(quizData);
+    // Reload stats to show updated data
+    await loadStats();
   };
 
   const resetQuiz = () => {
@@ -223,6 +273,9 @@ export default function Quiz({ onExit }) {
     setCurrentQuestionIndex(0);
     setShowScore(false);
     setSelectedOption(null);
+    setUserAnswers([]);
+    setShowReview(false);
+    setShowFeedbackModal(false);
   };
 
 
@@ -269,12 +322,64 @@ export default function Quiz({ onExit }) {
         {/* Main Title */}
         <Text style={styles.mainTitle}>🌍 Eco & Agriculture Quiz 🌱</Text>
 
-        {showScore ? (
+        {showReview ? (
+          /* Review Mode */
+          <View style={styles.reviewContainer}>
+            <Text style={styles.reviewTitle}>📝 Review Your Answers</Text>
+            {userAnswers.map((answer, index) => (
+              <View key={index} style={styles.reviewItem}>
+                <View style={styles.reviewHeader}>
+                  <Text style={styles.reviewQuestionNumber}>Q{index + 1}</Text>
+                  {answer.isCorrect ? (
+                    <MaterialIcons name="check-circle" size={24} color="#4CAF50" />
+                  ) : (
+                    <MaterialIcons name="cancel" size={24} color="#f44336" />
+                  )}
+                </View>
+                <Text style={styles.reviewQuestion}>{answer.question}</Text>
+                <Text style={styles.reviewAnswer}>
+                  Your answer: <Text style={answer.isCorrect ? styles.correctText : styles.incorrectText}>
+                    {answer.userAnswer}
+                  </Text>
+                </Text>
+                {!answer.isCorrect && (
+                  <Text style={styles.reviewAnswer}>
+                    Correct answer: <Text style={styles.correctText}>{answer.correctAnswer}</Text>
+                  </Text>
+                )}
+                <Text style={styles.reviewExplanation}>{answer.explanation}</Text>
+              </View>
+            ))}
+            <View style={styles.centerButtonContainer}>
+              <TouchableOpacity onPress={() => setShowReview(false)} style={styles.button}>
+                <Text style={styles.buttonText}>Back to Results</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : showScore ? (
           <View style={styles.scoreContainer}>
             <Text style={styles.resultTitle}>{getEndMessage().title}</Text>
             <Text style={styles.resultEmoji}>{getEndMessage().emoji}</Text>
             <Text style={styles.scoreText}>Your Score: {score}/{questions.length}</Text>
+            
+            {/* Show improvement */}
+            {stats && stats.totalQuizzes > 1 && (
+              <Text style={styles.progressText}>
+                Previous best: {stats.bestScore}/{TOTAL_QUESTIONS}
+              </Text>
+            )}
+            
             <Text style={styles.resultMessage}>{getEndMessage().message}</Text>
+            
+            {/* Review Answers Button */}
+            <TouchableOpacity 
+              onPress={() => setShowReview(true)} 
+              style={[styles.button, styles.reviewButton]}
+            >
+              <MaterialIcons name="rate-review" size={20} color="#fff" />
+              <Text style={styles.buttonText}> Review Answers</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity onPress={resetQuiz} style={styles.button}>
               <Text style={styles.buttonText}>Try Again</Text>
             </TouchableOpacity>
@@ -347,6 +452,17 @@ export default function Quiz({ onExit }) {
             )}
           </View>
         )}
+
+        {/* Feedback Modal */}
+        <FeedbackModal
+          visible={showFeedbackModal}
+          onClose={() => {
+            setShowFeedbackModal(false);
+            resetFeedbackCounters();
+          }}
+          context="quiz"
+          contextId={`quiz-${new Date().toISOString()}`}
+        />
       </View>
     </ScrollView>
   );
@@ -486,6 +602,11 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     width: '80%',
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  reviewButton: {
+    backgroundColor: '#9C27B0',
   },
   exitButton: {
     backgroundColor: '#e57373',
@@ -494,5 +615,80 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  statsPreview: {
+    backgroundColor: '#fff3e0',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
+    width: '90%',
+    alignItems: 'center',
+  },
+  statsPreviewText: {
+    fontSize: 14,
+    color: '#e65100',
+    fontWeight: '600',
+  },
+  reviewContainer: {
+    width: '100%',
+    paddingBottom: 20,
+  },
+  centerButtonContainer: {
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 15,
+  },
+  reviewTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  reviewItem: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    width: '100%',
+    borderLeftWidth: 4,
+    borderLeftColor: '#4CAF50',
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  reviewQuestionNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2e7d32',
+  },
+  reviewQuestion: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1b5e20',
+    marginBottom: 10,
+  },
+  reviewAnswer: {
+    fontSize: 14,
+    color: '#424242',
+    marginBottom: 5,
+  },
+  correctText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  incorrectText: {
+    color: '#f44336',
+    fontWeight: 'bold',
+  },
+  reviewExplanation: {
+    fontSize: 13,
+    color: '#616161',
+    marginTop: 8,
+    fontStyle: 'italic',
+    lineHeight: 18,
   },
 });

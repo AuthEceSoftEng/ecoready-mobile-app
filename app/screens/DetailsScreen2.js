@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   TouchableOpacity,
@@ -17,6 +16,9 @@ import WaveMeter from '../components/WaveMeter';
 import BarGraph from '../components/BarGraph';
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
 import CircularGauge from '../components/CircularGauge';
+import NutritionCard from '../components/NutritionCard';
+import foodDatabase from '../data/foodNutritionDB.json';
+import { generateAlert, getSuggestions } from '../utils/nutritionAlerts';
 
 const calculators = [
   { id: '1', name: 'Carbon Footprint', unit: 'kg CO₂/day', meter: 'Thermometer Gauge' },
@@ -75,26 +77,19 @@ const SectionDetails = ({ route }) => {
         break;
       }
       case '3': { // Calorie & Nutrition Impact
-        const { meat = 0, vegetables = 0, grains = 0 } = inputs;
-      
-        // Ensure all inputs are numbers and default to 0 if not set
-        const meatValue = parseFloat(meat) || 0;
-        const vegetableValue = parseFloat(vegetables) || 0;
-        const grainValue = parseFloat(grains) || 0;
-      
-        // CO₂ impact factors (kg CO₂ per kg of food)
-        const calorieCO2Impact = { meat: 27, vegetables: 3, grains: 5 };
-      
-        // Calculate emissions for each category
-        const meatEmissions = meatValue * calorieCO2Impact.meat;
-        const vegetableEmissions = vegetableValue * calorieCO2Impact.vegetables;
-        const grainEmissions = grainValue * calorieCO2Impact.grains;
-      
-        // Calculate total emissions
-        const totalEmissions = meatEmissions + vegetableEmissions + grainEmissions;
-      
-        // Store result
-        setResultValue(parseFloat(totalEmissions.toFixed(2))); // Keep two decimal places
+        // New food database logic
+        const { selectedFood, servingSize } = inputs;
+        
+        if (!selectedFood || !servingSize) {
+          setResultValue(0);
+          break;
+        }
+        
+        const food = foodDatabase.foods.find(f => f.id === selectedFood);
+        if (food) {
+          const servingKg = parseFloat(servingSize) / 1000;
+          result = food.carbonPerKg * servingKg;
+        }
         break;
       }
       case '4': {
@@ -139,25 +134,55 @@ const SectionDetails = ({ route }) => {
       case '2':
         return <WaveMeter value={resultValue} maxValue={500} unit="Liters/day" color={color} />;
         case '3': {
-          const { meat = 0, vegetables = 0, grains = 0 } = inputs;
-        
-          // CO₂ impact factors
-          const calorieCO2Impact = { meat: 27, vegetables: 3, grains: 5 };
-        
-          // Calculate emissions
-          const meatEmissions = (parseFloat(meat) || 0) * calorieCO2Impact.meat;
-          const vegetableEmissions = (parseFloat(vegetables) || 0) * calorieCO2Impact.vegetables;
-          const grainEmissions = (parseFloat(grains) || 0) * calorieCO2Impact.grains;
-          const totalEmissions = meatEmissions + vegetableEmissions + grainEmissions;
-        
-          // Render results and bar graph
+          if (!inputs.selectedFood || !inputs.servingSize) {
+            return <Text style={styles.noMeterText}>Please select a food and enter serving size</Text>;
+          }
+
+          const selectedFood = foodDatabase.foods.find(f => f.id === inputs.selectedFood);
+          if (!selectedFood) {
+            return <Text style={styles.noMeterText}>Food not found</Text>;
+          }
+
+          const servingKg = parseFloat(inputs.servingSize) / 1000; // Convert grams to kg
+          const carbonEmissions = (selectedFood.carbonPerKg * servingKg).toFixed(2);
+
+          // Generate alert and suggestions
+          const alert = generateAlert(selectedFood, servingKg);
+          const suggestions = getSuggestions(selectedFood);
+
           return (
             <>
-              <Text style={styles.totalText}>Total CO₂ Emissions: {totalEmissions.toFixed(2)} kg/day</Text>
-              <BarGraph
-                values={[meatEmissions * 100/totalEmissions, vegetableEmissions * 100/totalEmissions, grainEmissions * 100/totalEmissions]}
-                labels={['Meat', 'Vegetables', 'Grains']}
-              />
+              <Text style={styles.totalText}>
+                CO₂ Emissions: {carbonEmissions} kg for {inputs.servingSize}g
+              </Text>
+              
+              {/* Nutrition Card */}
+              <NutritionCard food={selectedFood} servingSize={parseFloat(inputs.servingSize)} />
+              
+              {/* Alert Section */}
+              <View style={[styles.alertBox, { 
+                backgroundColor: alert.alertType === 'red' ? '#ffebee' : alert.alertType === 'yellow' ? '#fff3e0' : '#e8f5e9',
+                borderColor: alert.alertType === 'red' ? '#f44336' : alert.alertType === 'yellow' ? '#ff9800' : '#4caf50'
+              }]}>
+                <Text style={styles.alertIcon}>{alert.icon}</Text>
+                <Text style={[styles.alertTitle, { color: alert.alertType === 'red' ? '#c62828' : alert.alertType === 'yellow' ? '#e65100' : '#2e7d32' }]}>{alert.title}</Text>
+                <Text style={styles.alertMessage}>{alert.message}</Text>
+              </View>
+
+              {/* Suggestions */}
+              {suggestions.length > 0 && (
+                <View style={styles.suggestionsBox}>
+                  <Text style={styles.suggestionsTitle}>💡 Better Alternatives:</Text>
+                  {suggestions.slice(0, 3).map((suggestion, index) => (
+                    <View key={index} style={styles.suggestionItem}>
+                      <Text style={styles.suggestionName}>{suggestion.name}</Text>
+                      <Text style={styles.suggestionDetails}>
+                        {suggestion.carbonPerKg.toFixed(1)} kg CO₂/kg • Sustainability: {suggestion.sustainabilityScore}/10
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </>
           );
         }
@@ -190,34 +215,57 @@ const SectionDetails = ({ route }) => {
 
   const renderInputFields = () => (
     <View style={styles.form}>
-      {inputFields[selectedCalculator.id].map((field) => (
-        <View key={field.key} style={styles.inputContainer}>
-          <Text style={styles.label}>{field.label}:</Text>
-          {field.type === 'number' ? (
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder="Enter value"
-              onChangeText={(value) =>
-                setInputs((prev) => ({ ...prev, [field.key]: parseFloat(value) || 0 }))
-              }
-            />
-          ) : (
-            <Picker
-              selectedValue={inputs[field.key]}
-              style={styles.picker}
-              onValueChange={(value) =>
-                setInputs((prev) => ({ ...prev, [field.key]: value }))
-              }
-            >
-              <Picker.Item label={field.defaultOption} value="" />
-              {field.options.map((option) => (
-                <Picker.Item key={option} label={option} value={option} />
-              ))}
-            </Picker>
-          )}
-        </View>
-      ))}
+      {inputFields[selectedCalculator.id].map((field) => {
+        // Filter foods by category for food selection dropdown
+        let foodOptions = field.options;
+        let foodLabels = field.optionLabels;
+        
+        if (field.filterByCategory && inputs.selectedCategory) {
+          const filteredFoods = foodDatabase.foods.filter(f => f.category === inputs.selectedCategory);
+          foodOptions = filteredFoods.map(f => f.id);
+          foodLabels = filteredFoods.map(f => f.name);
+        }
+
+        return (
+          <View key={field.key} style={styles.inputContainer}>
+            <Text style={styles.label}>{field.label}:</Text>
+            {field.type === 'number' ? (
+              <TextInput
+                style={styles.input}
+                keyboardType="numeric"
+                placeholder="Enter value"
+                value={inputs[field.key]?.toString() || ''}
+                onChangeText={(value) =>
+                  setInputs((prev) => ({ ...prev, [field.key]: parseFloat(value) || 0 }))
+                }
+              />
+            ) : (
+              <Picker
+                selectedValue={inputs[field.key]}
+                style={styles.picker}
+                onValueChange={(value) => {
+                  setInputs((prev) => ({ ...prev, [field.key]: value }));
+                  // Reset food selection when category changes
+                  if (field.key === 'selectedCategory') {
+                    setInputs((prev) => ({ ...prev, selectedFood: '' }));
+                  }
+                }}
+              >
+                <Picker.Item label={field.defaultOption} value="" />
+                {field.optionLabels ? (
+                  foodOptions.map((option, index) => (
+                    <Picker.Item key={option} label={foodLabels[index]} value={option} />
+                  ))
+                ) : (
+                  field.options.map((option) => (
+                    <Picker.Item key={option} label={option} value={option} />
+                  ))
+                )}
+              </Picker>
+            )}
+          </View>
+        );
+      })}
       <TouchableOpacity onPress={handleCalculate} style={styles.calculateButton}>
         <Text style={styles.calculateButtonText}>Calculate</Text>
       </TouchableOpacity>
@@ -241,9 +289,23 @@ const SectionDetails = ({ route }) => {
       { label: 'Weekly Laundry Loads', key: 'weeklyLaundry', type: 'number' },
     ],
     '3': [
-      { label: 'Meat (kg/day)', key: 'meat', type: 'number' },
-      { label: 'Vegetables (kg/day)', key: 'vegetables', type: 'number' },
-      { label: 'Grains (kg/day)', key: 'grains', type: 'number' },
+      {
+        label: 'Select Food Category',
+        key: 'selectedCategory',
+        type: 'dropdown',
+        options: ['Proteins', 'Dairy', 'Grains', 'Vegetables', 'Fruits', 'Oils'],
+        defaultOption: 'Choose a category',
+      },
+      {
+        label: 'Select Food',
+        key: 'selectedFood',
+        type: 'dropdown',
+        options: foodDatabase.foods.map(f => f.id),
+        optionLabels: foodDatabase.foods.map(f => f.name),
+        defaultOption: 'Choose a food',
+        filterByCategory: true,
+      },
+      { label: 'Serving Size (grams)', key: 'servingSize', type: 'number' },
     ],
     '4': [
       { label: 'Washing Machine Loads', key: 'washingMachine', type: 'number' },
@@ -265,7 +327,7 @@ const SectionDetails = ({ route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       {selectedCalculator ? (
         <ScrollView contentContainerStyle={styles.detailsContainer}>
           <Text style={styles.selectedHeader}>{selectedCalculator.name}</Text>
@@ -290,7 +352,7 @@ const SectionDetails = ({ route }) => {
           )}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -365,6 +427,66 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  alertBox: {
+    marginTop: 20,
+    padding: 15,
+    borderRadius: 8,
+    borderWidth: 2,
+  },
+  alertIcon: {
+    fontSize: 32,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  alertTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  alertMessage: {
+    fontSize: 14,
+    textAlign: 'center',
+    color: '#555',
+  },
+  suggestionsBox: {
+    marginTop: 20,
+    padding: 15,
+    backgroundColor: '#f0f8ff',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#add8e6',
+  },
+  suggestionsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  suggestionItem: {
+    marginVertical: 5,
+    padding: 10,
+    backgroundColor: '#ffffff',
+    borderRadius: 6,
+    borderLeftWidth: 3,
+    borderLeftColor: '#4caf50',
+  },
+  suggestionName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  suggestionDetails: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+  noMeterText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 

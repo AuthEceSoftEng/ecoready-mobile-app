@@ -14,6 +14,8 @@ import {
   StatusBar,
   SafeAreaView
 } from 'react-native';
+import FeedbackModal from '../components/FeedbackModal';
+import { shouldShowFeedback, incrementSessionCounter, resetFeedbackCounters } from '../utils/feedbackFrequency';
 
 const decisions = [
   {
@@ -79,6 +81,7 @@ export default function Game({ onExit }) {
   const [metrics, setMetrics] = useState({ food: 100, environment: 100, budget: 100 });
   const [currentScenario, setCurrentScenario] = useState(0);
   const [instructionsVisible, setInstructionsVisible] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
 
   // Get dynamic window dimensions for responsive layout
   const { width, height } = useWindowDimensions();
@@ -111,7 +114,7 @@ export default function Game({ onExit }) {
     return () => backHandler.remove();
   }, [onExit]);
 
-  const handleDecision = (option) => {
+  const handleDecision = async (option) => {
     const newMetrics = {
       food: Math.max(0, metrics.food + option.food),
       environment: Math.max(0, metrics.environment + option.environment),
@@ -119,10 +122,33 @@ export default function Game({ onExit }) {
     };
 
     if (Object.values(newMetrics).some((metric) => metric <= 0)) {
+      await incrementSessionCounter();
+      const shouldShow = await shouldShowFeedback();
       Alert.alert(
         "💔 Game Over",
         "One of your resources dropped to zero! Unfortunately, your region couldn't survive the challenges.",
-        [{ text: "Try Again", onPress: resetGame }]
+        [
+          { 
+            text: "Try Again", 
+            onPress: () => {
+              if (shouldShow) {
+                setShowFeedbackModal(true);
+              }
+              resetGame();
+            }
+          },
+          {
+            text: "🎮 Back to Game Hub",
+            style: "cancel",
+            onPress: () => {
+              if (shouldShow) {
+                setShowFeedbackModal(true);
+              }
+              resetGame();
+              onExit();
+            }
+          }
+        ]
       );
       return;
     }
@@ -131,11 +157,34 @@ export default function Game({ onExit }) {
     const nextScenario = (currentScenario + 1) % decisions.length;
 
     if (currentYear === 10) {
+      await incrementSessionCounter();
+      const shouldShow = await shouldShowFeedback();
       Alert.alert(
         "🎉 Congratulations!",
         `You successfully managed your region for 10 years! 🌟\n\n
          Final Scores:\n🌾 Food Security: ${newMetrics.food}\n🌿 Environment: ${newMetrics.environment}\n💰 Budget: ${newMetrics.budget}\n\nYour leadership was inspiring!`,
-        [{ text: "Play Again", onPress: resetGame }]
+        [
+          { 
+            text: "Play Again", 
+            onPress: () => {
+              if (shouldShow) {
+                setShowFeedbackModal(true);
+              }
+              resetGame();
+            }
+          },
+          {
+            text: "🎮 Back to Game Hub",
+            style: "cancel",
+            onPress: () => {
+              if (shouldShow) {
+                setShowFeedbackModal(true);
+              }
+              resetGame();
+              onExit();
+            }
+          }
+        ]
       );
       return;
     }
@@ -148,6 +197,7 @@ export default function Game({ onExit }) {
     setMetrics({ food: 100, environment: 100, budget: 100 });
     setCurrentScenario(0);
     setCurrentYear(1);
+    setShowFeedbackModal(false);
   };
 
   return (
@@ -482,6 +532,17 @@ export default function Game({ onExit }) {
           </View>
         </View>
       </Modal>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        visible={showFeedbackModal}
+        onClose={() => {
+          setShowFeedbackModal(false);
+          resetFeedbackCounters();
+        }}
+        context="game"
+        contextId="resource-management"
+      />
     </SafeAreaView>
   );
 }

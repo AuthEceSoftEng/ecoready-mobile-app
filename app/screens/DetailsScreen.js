@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  SafeAreaView,
   View,
   Text,
   FlatList,
   TouchableOpacity,
   BackHandler,
   LayoutAnimation,
-  StyleSheet
+  StyleSheet,
+  ScrollView
 } from 'react-native';
 import InputFields from '../components/calculator/InputFields';
 import InputSummary from '../components/calculator/InputSummary';
 import ResultMeter from '../components/calculator/ResultMeter';
 import { calculateResults } from '../utils/calculateResults';
+import foodDatabase from '../data/foodNutritionDB.json';
 
 const calculators = [
     { 
@@ -79,9 +80,25 @@ const calculators = [
       { label: '👕 Weekly Laundry Loads', key: 'weeklyLaundry', type: 'slider', min: 0, max: 20, step: 1 },
     ],
     '3': [
-      { label: '🥩 Meat (portions/day)', key: 'meat', type: 'slider', min: 0, max: 5, step: 1 },
-      { label: '🥦 Vegetables (portions/day)', key: 'vegetables', type: 'slider', min: 0, max: 10, step: 1 },
-      { label: '🌾 Grains (portions/day)', key: 'grains', type: 'slider', min: 0, max: 10, step: 1 },
+      { 
+        label: '📦 Food Category', key: 'foodCategory', type: 'dropdown',
+        options: [
+          { label: 'Proteins', value: 'Proteins' },
+          { label: 'Dairy', value: 'Dairy' },
+          { label: 'Grains', value: 'Grains' },
+          { label: 'Vegetables', value: 'Vegetables' },
+          { label: 'Fruits', value: 'Fruits' },
+          { label: 'Oils', value: 'Oils' }
+        ],
+        defaultOption: 'Select Category',
+      },
+      { 
+        label: '🍽 Food Item', key: 'foodItem', type: 'dropdown',
+        options: foodDatabase.foods.map(f => ({ label: f.name, value: f.id })),
+        defaultOption: 'Select Food',
+        filterByCategory: true,
+      },
+      { label: '⚖️ Serving Size (grams)', key: 'servingSize', type: 'number', placeholder: 'Enter grams (e.g., 100)' },
     ],
     '4': [
       { label: '⚡ Monthly Energy Usage (kWh)', key: 'energyUsage', type: 'number', placeholder: 'Enter kWh' },
@@ -149,7 +166,7 @@ const SectionDetails = () => {
         } 
         else if (field.type === 'dropdown') { // Validate dropdown selection
             const value = inputs[field.key];
-            if (!value || value === "") {
+            if (!value) {
                 missingFields.push(field.label);
             }
         }
@@ -184,7 +201,7 @@ const SectionDetails = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
     {selectedCalculator && (
       <View style={[styles.titleContainer, { backgroundColor: selectedCalculator.bgColor }]}>
         <Text style={[styles.title, { color: selectedCalculator.color }]}>
@@ -194,13 +211,17 @@ const SectionDetails = () => {
     )}
       {selectedCalculator ? (
         calculationCompleted ? (
-          <View style={styles.detailsContainer}>
+          <ScrollView 
+            style={styles.detailsScrollView} 
+            contentContainerStyle={styles.detailsContent}
+            showsVerticalScrollIndicator={true}
+          >
             <InputSummary selectedCalculator={selectedCalculator} inputs={inputs} />
             <ResultMeter selectedCalculator={selectedCalculator} resultValue={resultValue} />
             <TouchableOpacity onPress={() => setCalculationCompleted(false)} style={styles.modifyButton}>
               <Text style={styles.modifyButtonText}>Modify Inputs</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         ) : (
           <InputFields 
             selectedCalculator={selectedCalculator} 
@@ -226,7 +247,7 @@ const SectionDetails = () => {
           />
         </>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -242,8 +263,9 @@ const styles = StyleSheet.create({
   icon: { fontSize: 32, marginBottom: 10 },
   cardTitle: { fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
   unit: { fontSize: 12, textAlign: 'center' },
-  detailsContainer: { flex: 0.8, padding: 10, alignItems: 'center' },
-  modifyButton: { backgroundColor: '#1E4E75', borderRadius: 8, alignItems: 'center', padding: 10, marginTop: 20 },
+  detailsScrollView: { flex: 1, width: '100%' },
+  detailsContent: { padding: 10, alignItems: 'center', paddingBottom: 40 },
+  modifyButton: { backgroundColor: '#1E4E75', borderRadius: 8, alignItems: 'center', padding: 12, marginTop: 20, width: '80%' },
   modifyButtonText: { color: '#ffffff', fontSize: 18, fontWeight: 'bold' },
   titleContainer: {
     paddingVertical: 15,

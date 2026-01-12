@@ -1,8 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import foodDatabase from '../../data/foodNutritionDB.json';
 
 const InputSummary = ({ selectedCalculator, inputs }) => {
   if (!selectedCalculator) return null;
+
+  // Get food name from ID for calculator #3
+  const getFoodName = (foodId) => {
+    const food = foodDatabase.foods.find(f => f.id === foodId);
+    return food ? food.name : 'Not selected';
+  };
 
   const summaries = {
     '1': [
@@ -15,9 +22,9 @@ const InputSummary = ({ selectedCalculator, inputs }) => {
       { label: '🧺 Weekly Laundry', value: inputs.weeklyLaundry ? `${inputs.weeklyLaundry} loads` : "0 loads" }
     ],
     '3': [
-      { label: '🥩 Meat Portions', value: inputs.meat ? `${inputs.meat} portions` : "0 portions" },
-      { label: '🥦 Vegetable Portions', value: inputs.vegetables ? `${inputs.vegetables} portions` : "0 portions" },
-      { label: '🌾 Grain Portions', value: inputs.grains ? `${inputs.grains} portions` : "0 portions" }
+      { label: '📦 Food Category', value: inputs.foodCategory || 'Not selected' },
+      { label: '🍽 Food Item', value: getFoodName(inputs.foodItem) },
+      { label: '⚖️ Serving Size', value: inputs.servingSize ? `${inputs.servingSize}g` : '0g' }
     ],
     '4': [
       { label: '⚡ Monthly Energy Usage', value: inputs.energyUsage ? `${inputs.energyUsage} kWh` : "0 kWh" },

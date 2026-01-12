@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Image, TouchableOpacity, StyleSheet, StatusBar, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { MaterialIcons } from '@expo/vector-icons';
 import { navigate } from '../navigations/NavigationService';
 import common from '../styles/common';
 
@@ -14,8 +14,8 @@ const Header = () => {
         translucent // Ensures content overlaps the StatusBar
       />
 
-      {/* SafeAreaView to handle safe areas */}
-      <SafeAreaView style={styles.safeArea}>
+      {/* Header content without SafeAreaView since App.js handles it */}
+      <View style={styles.headerArea}>
         <View style={common.headerContainer}>
           {/* Left Spacer */}
           <View style={{ flex: 1 }} />
@@ -32,16 +32,23 @@ const Header = () => {
             />
           </TouchableOpacity>
 
-          {/* Right Spacer */}
-          <View style={{ flex: 1 }} />
+          {/* Profile Icon - Right */}
+          <View style={{ flex: 1, alignItems: 'flex-end' }}>
+            <TouchableOpacity
+              style={styles.profileIcon}
+              onPress={() => navigate('Profile')}
+            >
+              <MaterialIcons name="account-circle" size={28} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </SafeAreaView>
+      </View>
     </>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
+  headerArea: {
     backgroundColor: '#1E4E75', // Match the header background color
     flexDirection: 'column',
     justifyContent: 'center',
@@ -52,9 +59,8 @@ const styles = StyleSheet.create({
     height: 40,
     alignSelf: 'center',
   },
-  notificationIcon: {
-    position: 'relative',
-    alignItems: 'flex-end',
+  profileIcon: {
+    padding: 8,
   },
   badge: {
     position: 'absolute',
