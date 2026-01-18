@@ -14,15 +14,22 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "gr.auth.ee.issel.ecoready"
+      "bundleIdentifier": "gr.auth.ee.issel.ecoready",
+      "infoPlist": {
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "targetSdkVersion": 35,
-      "package": "gr.auth.ee.issel.ecoready"
+      "package": "gr.auth.ee.issel.ecoready",
+      "permissions": [
+        "NOTIFICATIONS",
+        "SCHEDULE_EXACT_ALARM"
+      ],
+      "useNextNotificationsApi": true
     },
     "web": {
       "favicon": "./assets/logo.png"

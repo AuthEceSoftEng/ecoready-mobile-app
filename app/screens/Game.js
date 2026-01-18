@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import FeedbackModal from '../components/FeedbackModal';
 import { shouldShowFeedback, incrementSessionCounter, resetFeedbackCounters } from '../utils/feedbackFrequency';
+import { saveGameResult } from '../utils/progressStorage';
 
 const decisions = [
   {
@@ -158,6 +159,18 @@ export default function Game({ onExit }) {
 
     if (currentYear === 10) {
       await incrementSessionCounter();
+      
+      // Save game result to learning journey
+      await saveGameResult({
+        gameName: 'Climate Strategy Game',
+        score: 10,
+        metrics: {
+          food: newMetrics.food,
+          environment: newMetrics.environment,
+          budget: newMetrics.budget
+        }
+      });
+      
       const shouldShow = await shouldShowFeedback();
       Alert.alert(
         "🎉 Congratulations!",

@@ -93,15 +93,18 @@ const ProfileScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {stats && stats.totalQuizzes === 0 ? (
+      {stats && stats.totalQuizzes === 0 && stats.totalGames === 0 ? (
         /* No data yet - Welcome message */
         <View style={styles.emptyState}>
           <MaterialIcons name="school" size={80} color="#ccc" />
           <Text style={styles.emptyTitle}>Start Your Journey!</Text>
           <Text style={styles.emptyText}>
-            Take your first quiz to begin tracking your learning progress and unlock achievements!
+            Take a quiz or play a game to begin tracking your learning progress and unlock achievements!
           </Text>
-          <TouchableOpacity style={styles.emptyButton}>
+          <TouchableOpacity 
+            style={styles.emptyButton}
+            onPress={() => navigation.navigate('Quiz')}
+          >
             <Text style={styles.emptyButtonText}>Take a Quiz</Text>
           </TouchableOpacity>
         </View>
@@ -112,19 +115,19 @@ const ProfileScreen = () => {
             <View style={styles.statCard}>
               <MaterialIcons name="quiz" size={32} color="#2196F3" />
               <Text style={styles.statNumber}>{stats.totalQuizzes}</Text>
-              <Text style={styles.statLabel}>Quizzes Taken</Text>
+              <Text style={styles.statLabel}>Quizzes</Text>
+            </View>
+
+            <View style={styles.statCard}>
+              <MaterialIcons name="sports-esports" size={32} color="#E91E63" />
+              <Text style={styles.statNumber}>{stats.totalGames}</Text>
+              <Text style={styles.statLabel}>Games</Text>
             </View>
 
             <View style={styles.statCard}>
               <MaterialIcons name="star" size={32} color="#FFC107" />
               <Text style={styles.statNumber}>{stats.averageScore.toFixed(1)}</Text>
               <Text style={styles.statLabel}>Avg Score</Text>
-            </View>
-
-            <View style={styles.statCard}>
-              <MaterialIcons name="emoji-events" size={32} color="#4CAF50" />
-              <Text style={styles.statNumber}>{stats.bestScore}/10</Text>
-              <Text style={styles.statLabel}>Best Score</Text>
             </View>
 
             <View style={styles.statCard}>

@@ -13,6 +13,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import FeedbackModal from '../components/FeedbackModal';
 import { shouldShowFeedback, incrementSessionCounter, resetFeedbackCounters } from '../utils/feedbackFrequency';
+import { saveGameResult } from '../utils/progressStorage';
 
 const { width, height } = Dimensions.get('window');
 
@@ -305,9 +306,25 @@ const EcoReadyGame = ({ navigation, route, onExit }) => {
 
   const completeScenario = async () => {
     setModalVisible(false);
-    setCompletedScenarios(prev => [...prev, currentScenario.id]);
+    const newCompletedScenarios = [...completedScenarios, currentScenario.id];
+    setCompletedScenarios(newCompletedScenarios);
     showModal('scenarioComplete', {});
     await incrementSessionCounter();
+    
+    // Check if all scenarios completed (game won)
+    if (newCompletedScenarios.length === gameData.scenarios.length) {
+      await saveGameResult({
+        gameName: 'Your Food Future',
+        score: 10,
+        metrics: {
+          food: stats.food,
+          biodiversity: stats.biodiversity,
+          wellbeing: stats.wellbeing,
+          resilience: stats.resilience
+        }
+      });
+    }
+    
     const shouldShow = await shouldShowFeedback();
     if (shouldShow) {
       setTimeout(() => setShowFeedbackModal(true), 1000);

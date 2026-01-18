@@ -3,6 +3,7 @@ import { sendAchievementNotification } from './notificationService';
 import { formatDateDMY } from './dateFormatter';
 
 const QUIZ_HISTORY_KEY = 'quiz_history';
+const GAME_HISTORY_KEY = 'game_history';
 const ACHIEVEMENTS_KEY = 'achievements';
 
 // Achievement definitions
@@ -13,6 +14,13 @@ const ACHIEVEMENT_DEFINITIONS = [
     description: 'Complete your first quiz',
     icon: 'eco',
     requirement: (stats) => stats.totalQuizzes >= 1,
+  },
+  {
+    id: 'first_game',
+    name: 'Game Master',
+    description: 'Complete your first game',
+    icon: 'sports-esports',
+    requirement: (stats) => stats.totalGames >= 1,
   },
   {
     id: 'perfect_score',
@@ -67,6 +75,20 @@ const ACHIEVEMENT_DEFINITIONS = [
       return highScores.length >= 5;
     },
   },
+  {
+    id: 'game_collector',
+    name: 'Game Collector',
+    description: 'Complete 5 games',
+    icon: 'collections',
+    requirement: (stats) => stats.totalGames >= 5,
+  },
+  {
+    id: 'activity_master',
+    name: 'Activity Master',
+    description: 'Complete 20 total activities (quizzes + games)',
+    icon: 'landscape',
+    requirement: (stats) => stats.totalActivities >= 20,
+  },
 ];
 
 /**
@@ -106,6 +128,54 @@ export const saveQuizResult = async (quizData) => {
 };
 
 /**
+ * Save a game result (for games like Climate Strategy, Your Food Future)
+ */
+export const saveGameResult = async (gameData) => {
+  try {
+    const { gameName, score, metrics, date } = gameData;
+    
+    const gameResult = {
+      gameName,
+      score: score || 10, // Default score for completing a game
+      metrics: metrics || {}, // Store game-specific metrics
+      date: date || formatDateDMY(new Date()),
+      timestamp: Date.now(),
+    };
+
+    // Get existing history
+    const historyJson = await AsyncStorage.getItem(GAME_HISTORY_KEY);
+    const history = historyJson ? JSON.parse(historyJson) : [];
+
+    // Add new result
+    history.push(gameResult);
+
+    // Save updated history
+    await AsyncStorage.setItem(GAME_HISTORY_KEY, JSON.stringify(history));
+
+    // Check for new achievements
+    await checkAndUnlockAchievements();
+
+    return true;
+  } catch (error) {
+    console.error('Error saving game result:', error);
+    return false;
+  }
+};
+
+/**
+ * Get game history
+ */
+export const getGameHistory = async () => {
+  try {
+    const historyJson = await AsyncStorage.getItem(GAME_HISTORY_KEY);
+    return historyJson ? JSON.parse(historyJson) : [];
+  } catch (error) {
+    console.error('Error getting game history:', error);
+    return [];
+  }
+};
+
+/**
  * Get quiz history
  */
 export const getQuizHistory = async () => {
@@ -119,49 +189,70 @@ export const getQuizHistory = async () => {
 };
 
 /**
- * Calculate statistics from quiz history
+ * Calculate statistics from quiz and game history
  */
 export const calculateStats = async () => {
   try {
-    const history = await getQuizHistory();
+    const quizHistory = await getQuizHistory();
+    const gameHistory = await getGameHistory();
 
-    if (history.length === 0) {
+    if (quizHistory.length === 0 && gameHistory.length === 0) {
       return {
         totalQuizzes: 0,
+        totalGames: 0,
+        totalActivities: 0,
         averageScore: 0,
         bestScore: 0,
         currentStreak: 0,
         longestStreak: 0,
         quizHistory: [],
+        gameHistory: [],
       };
     }
 
-    // Calculate total and average
-    const totalQuizzes = history.length;
-    const totalScore = history.reduce((sum, quiz) => sum + quiz.score, 0);
-    const averageScore = totalScore / totalQuizzes;
-    const bestScore = Math.max(...history.map(quiz => quiz.score));
+    // Calculate quiz stats
+    let totalQuizzes = quizHistory.length;
+    let totalScore = 0;
+    let bestScore = 0;
+    if (quizHistory.length > 0) {
+      totalScore = quizHistory.reduce((sum, quiz) => sum + quiz.score, 0);
+      bestScore = Math.max(...quizHistory.map(quiz => quiz.score));
+    }
 
-    // Calculate streaks
-    const { currentStreak, longestStreak } = calculateStreaks(history);
+    // Calculate game stats
+    const totalGames = gameHistory.length;
+
+    // Combined stats
+    const totalActivities = totalQuizzes + totalGames;
+    const combinedTotalScore = totalScore + (gameHistory.reduce((sum, game) => sum + (game.score || 10), 0));
+    const averageScore = totalActivities > 0 ? combinedTotalScore / totalActivities : 0;
+
+    // Calculate streaks (based on quizzes)
+    const { currentStreak, longestStreak } = calculateStreaks(quizHistory);
 
     return {
       totalQuizzes,
+      totalGames,
+      totalActivities,
       averageScore: parseFloat(averageScore.toFixed(1)),
-      bestScore,
+      bestScore: bestScore || 10,
       currentStreak,
       longestStreak,
-      quizHistory: history,
+      quizHistory,
+      gameHistory,
     };
   } catch (error) {
     console.error('Error calculating stats:', error);
     return {
       totalQuizzes: 0,
+      totalGames: 0,
+      totalActivities: 0,
       averageScore: 0,
       bestScore: 0,
       currentStreak: 0,
       longestStreak: 0,
       quizHistory: [],
+      gameHistory: [],
     };
   }
 };

@@ -13,6 +13,7 @@ import NewsScreen from '../screens/NewsScreen';
 import GamesScreen from '../screens/GamesScreen';
 import TipsScreen from '../screens/TipScreen'; // Import the new TipsScreen
 import SettingsScreen from '../screens/SettingsScreen'; // Import Settings Screen
+import Quiz from '../screens/Quiz'; // Import Quiz Screen
 
 // Create the Tab Navigator and Stack Navigator
 const Tab = createBottomTabNavigator();
@@ -25,6 +26,7 @@ const AppNavigator = () => {
         <Stack.Screen name="MainTabs" component={TabNavigator} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
+        <Stack.Screen name="Quiz" component={Quiz} />
       </Stack.Navigator>
     </NavigationContainer>
   );
