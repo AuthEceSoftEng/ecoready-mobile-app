@@ -2,7 +2,7 @@
   "expo": {
     "name": "ECOReady",
     "slug": "ecoready",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -46,7 +46,7 @@
         "projectId": "65c1b6b1-7d28-4c37-8fb9-2dc848f81990"
       }
     },
-    "runtimeVersion": "1.0.2",
+    "runtimeVersion": "1.0.3",
     "plugins": [
       [
         "expo-build-properties",
