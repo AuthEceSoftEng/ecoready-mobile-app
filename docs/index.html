@@ -4,115 +4,58 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Download the EcoReady mobile app and explore the ECO-READY project and Observatory.">
+  <meta name="theme-color" content="#0b3029">
   <title>EcoReady Mobile App</title>
   <link rel="icon" type="image/png" href="./logo.png">
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: linear-gradient(145deg, #e6f5f2, #f6faee);
-      color: #163832;
-      font: 1rem/1.6 system-ui, sans-serif;
-    }
-
-    main {
-      width: min(44rem, calc(100% - 2rem));
-      margin: clamp(1rem, 7vw, 5rem) auto;
-      padding: clamp(1.25rem, 5vw, 3.5rem);
-      background: #fff;
-      border: 1px solid #cddfd8;
-      border-radius: 1.5rem;
-    }
-
-    header { text-align: center; }
-
-    img {
-      display: block;
-      margin: 0 auto 1rem;
-      border: 1px solid #cddfd8;
-      border-radius: 1.25rem;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(2.5rem, 8vw, 4rem);
-      line-height: 1.1;
-      letter-spacing: -0.045em;
-    }
-
-    p {
-      max-width: 34rem;
-      margin: 1rem auto 0;
-      color: #425e56;
-    }
-
-    section { margin-top: 2rem; }
-
-    h2 {
-      margin: 0 0 0.65rem;
-      font-size: 1.125rem;
-    }
-
-    .links {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
-      gap: 0.75rem;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-
-    a {
-      display: block;
-      padding: 0.7rem 0.9rem;
-      border: 1px solid #a9cec2;
-      border-radius: 0.65rem;
-      background: #f2faf7;
-      color: #135448;
-      font-weight: 650;
-      text-align: center;
-      text-underline-offset: 0.16em;
-    }
-
-    a:hover { background: #dcefe8; }
-
-    a:focus-visible {
-      outline: 3px solid #2164a1;
-      outline-offset: 3px;
-    }
-
-    .download a {
-      border-color: #125b4b;
-      background: #125b4b;
-      color: #fff;
-    }
-
-    .download a:hover { background: #0c4438; }
-  </style>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <main>
-    <header>
-      <img src="./logo.png" alt="" width="96" height="96">
-      <h1>EcoReady</h1>
-      <p>Explore how everyday choices affect the environment with interactive calculators, practical tips, and sustainability quizzes.</p>
-    </header>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div class="brand"><img src="./logo.png" alt="" width="42" height="42"> EcoReady</div>
+      <nav aria-label="ECO-READY project">
+        <a href="https://www.eco-ready.eu/">Project website</a>
+        <a href="https://app.eco-ready.eu/">Observatory</a>
+      </nav>
+    </div>
+  </header>
 
-    <section class="download" aria-labelledby="download-heading">
-      <h2 id="download-heading">Get the mobile app</h2>
-      <ul class="links">
-        <li><a href="https://play.google.com/store/apps/details?id=gr.auth.ee.issel.ecoready">Google Play</a></li>
-        <li><a href="https://apps.apple.com/us/app/ecoready/id6828757199">App Store</a></li>
-      </ul>
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-inner">
+        <div class="intro">
+          <h1 id="hero-title">Learn to live <em>sustainably.</em></h1>
+          <p>See how your everyday choices affect the environment. Explore your impact with EcoReady, find practical tips, and test what you know.</p>
+          <ul class="store-links" aria-label="Download EcoReady">
+            <li><a href="https://play.google.com/store/apps/details?id=gr.auth.ee.issel.ecoready"><img src="./google-play.png" alt="Get it on Google Play"></a></li>
+            <li><a href="https://apps.apple.com/us/app/ecoready/id6828757199"><img src="./app-store.png" alt="Download on the App Store"></a></li>
+          </ul>
+        </div>
+
+        <div class="showcase">
+          <div class="phone">
+            <img src="./app-preview.webp" alt="EcoReady home screen showing Eco News, Metrics, Eco Games, and Sustainable Tips" width="420" height="933">
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section aria-labelledby="project-heading">
-      <h2 id="project-heading">Explore the project</h2>
-      <ul class="links">
-        <li><a href="https://www.eco-ready.eu/">ECO-READY website</a></li>
-        <li><a href="https://app.eco-ready.eu/">ECO-READY Observatory</a></li>
-      </ul>
+    <section class="wrap features" aria-labelledby="features-title">
+      <h2 id="features-title">Inside the app</h2>
+      <div class="feature-grid">
+        <article>
+          <h3>Measure your impact</h3>
+          <p>Use interactive calculators to explore the impact of travel, food, and household habits.</p>
+        </article>
+        <article>
+          <h3>Find everyday tips</h3>
+          <p>Get practical ideas for saving water and energy and cutting down on waste.</p>
+        </article>
+        <article>
+          <h3>Learn through play</h3>
+          <p>Test your environmental knowledge with quizzes and sustainability games.</p>
+        </article>
+      </div>
     </section>
   </main>
 </body>
